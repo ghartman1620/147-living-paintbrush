@@ -95,11 +95,12 @@ function flower(x, y, numPetals, height, width, r, g, b) {
 }
 let j = 0;
 function draw() {
-    let flo = flower(100, 100, 5, 50, 30, 255, 0, 0);
-    if(j ==0){
-        flo.draw();
-        j++;
-    }
+    petal(100, 100, 30, 200, 80, 3*PI/4);
+    //    let flo = flower(100, 100, 5, 50, 30, 255, 0, 0);
+//    if(j ==0){
+//        flo.draw();
+//        j++;
+//    }
 //    for(let theta = 0; theta <= 2*PI; theta += 2*PI/5) {
 //        petal(100, 100, 30, 50, 50, theta);
 //    }

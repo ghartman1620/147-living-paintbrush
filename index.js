@@ -229,8 +229,11 @@ function draw() {
 
             
         }
-        for(let flower of points[i].flowers) {
-            flower.draw(points[i].x, points[i].y);
+        
+    }
+    for(let point of points) {
+        for(let flower of point.flowers) {
+            flower.draw(point.x, point.y);
         }
     }
     
