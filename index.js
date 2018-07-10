@@ -126,7 +126,7 @@ function rectObj(x, y, width, height, r, g, b) {
         },
         // This function is a little bit hand-wavey, but what it does is this shape is
         // allowed to determine what the next point on the vine should be given a mouse cursor position in it.
-        // For this particular rectangle, it will wrap around the rectangle like a sin wave.
+        // For this particular rectangle, it will wrap around the rectangle like a cos wave.
         translatePoint: function(x, y) {
             // y plus some oscillating offset. the height of the oscillation is determined by how close the cursor is on y to the center of this rect.
             // if the cursor is very close to the center of the rect, it oscillates over the whole rect. if it's close to the edge it doesn't oscillate
@@ -205,7 +205,6 @@ function draw() {
             addPoint(pt.x, pt.y);
 
         } else {
-            console.log("add mouse point");
             addPoint(mouseX, mouseY);
         }
     }
