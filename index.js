@@ -87,7 +87,6 @@ function flower(offsetX, offsetY, numPetals, numLayers, height, width, r, g, b) 
     let flower = {offsetX, offsetY, numPetals, height, width, r, g, b, numLayers, petals: []};
     // Create the first layer of petals. The first layer has numPetals petals
     // and we'll use their positions to determine the petals in the other layers.
-    debugger;
     let petalAngles = [];
     for(let theta = 0; theta < 2*PI; theta += 2*PI/flower.numPetals) {
         petalAngles.push(theta);
@@ -107,7 +106,8 @@ function flower(offsetX, offsetY, numPetals, numLayers, height, width, r, g, b) 
     }
     flower.draw = function(x, y) {
         fill(this.r, this.g, this.b);
-        strokeWeight(0);
+        strokeWeight(.5);
+        stroke(255,255,255);
         for(const petal of this.petals) {
             petal.draw(x, y);
         }
@@ -116,55 +116,102 @@ function flower(offsetX, offsetY, numPetals, numLayers, height, width, r, g, b) 
     return flower;
 }
 
+function rectObj(x, y, width, height, r, g, b) {
+    let rec = {
+        x, y, width, height, r, g, b,
+        enteredMouseX: undefined,
+        enteredMouseY: undefined,
+        containsPoint: function(x, y) {
+            return x > this.x && y > this.y && x <= this.x + this.width && y <= this.y + this.height
+        },
+        // This function is a little bit hand-wavey, but what it does is this shape is
+        // allowed to determine what the next point on the vine should be given a mouse cursor position in it.
+        // For this particular rectangle, it will wrap around the rectangle like a sin wave.
+        translatePoint: function(x, y) {
+            // y plus some oscillating offset. the height of the oscillation is determined by how close the cursor is on y to the center of this rect.
+            // if the cursor is very close to the center of the rect, it oscillates over the whole rect. if it's close to the edge it doesn't oscillate
+            // and accepts the given y.
+            
+            let differenceFromMid = (this.height-abs(y - (this.y + this.height/2)))
+            let xMultiplier = cos((x-this.enteredMouseX)/200)
+            if(this.enteredMouseY < (this.y+this.height/2)) {
+                return {x,  y: y - cos((x-this.enteredMouseX)/200)* (this.height/2-abs(y - (this.y + this.height/2)))}
+            } else {
+                return {x, y: y + cos((x-this.enteredMouseX)/200)* (this.height/2-abs(y - (this.y + this.height/2)))}
+            }
+
+        },
+        validPointChange: function(x, y) {
+            return abs(x - points[points.length-1].x) > 3
+        },
+    };
+    return rec;
+    
+}
 
 const points = [];
+const rectangles = [];
+rectangles.push(rectObj(0, 500, WIDTH, 200, 211, 211, 211));
+
+
+// Adds a point to the vine, moving the vine growth forward.
+function addPoint(x, y) {
+    points.push({
+        x,
+        y,
+        width: undefined,
+        flowers: [],
+    });
+    let i = 0;
+    for(let point of points) {
+        i++;
+    }
+    for(let i = points.length-1; i >= 1; i--) {
+        points[i].width = points[i-1].width;
+        points[i].flowers = Object.assign([], points[i-1].flowers);
+    }
+    points[0].flowers = [];
+    points[0].width = 2+6*abs(sin(points.length/20));
+}
 
 function draw() { 
-    if((points.length === 0 || dist(points[points.length-1].x, points[points.length-1].y, mouseX, mouseY) > 5)
-       && mouseX > 0 && mouseX < WIDTH && mouseY > 0 && mouseY < HEIGHT){
-        points.push({
-            x: mouseX,
-            y: mouseY,
-            width: undefined,
-            flowers: [],
-        });
-        let i = 0;
-        for(let point of points) {
-            i++;
-        }
-        for(let i = points.length-1; i >= 1; i--) {
-            points[i].width = points[i-1].width;
-            points[i].flowers = Object.assign([], points[i-1].flowers);
-        }
-        points[0].flowers = [];
-        points[0].width = 2+6*abs(sin(points.length/20));
-        
-    }
-    
-    if(mouseIsPressed && points.length > 1) {
-        
-        // grab a random point near our most recently added point
-        
-        // WIP stuff for vine offshoots
-//        let x1 = points[points.length-1].x;
-//        let x2 = points[points.length-5].x;
-//        let y1 = points[points.length-1].y;
-//        let y2 = points[points.length-5].y;
-//        console.log("x1: " + x1);
-//        console.log("y1: " + y1);
-//        console.log("x2: " + x2);
-//        console.log("y2: " + y2);
-//        
-//        let alpha = HALF_PI - atan(abs(x1 - x2) / abs(y1 - y2)) 
-//        
-//        console.log("alpha: " + alpha);
-//        let l = 20;
-//        let x3 = x1 - l*cos(alpha);
-//        let y3 = y1 - l*sin(alpha);
-//        points[points.length - 1].extension = {x: x3, y: y3};
-    }
-    
     clear();
+    
+    if(points.length === 0){
+        addPoint(mouseX, mouseY);
+    }
+    let rectWithMouse = undefined;
+    for(const recta of rectangles) {
+        fill(recta.r, recta.g, recta.b);
+        strokeWeight(0);
+        rect(recta.x, recta.y, recta.width, recta.height);
+        
+        
+        if(recta.containsPoint(mouseX, mouseY)) {
+            rectWithMouse = recta;
+            if(recta.enteredMouseX === undefined) {
+                recta.enteredMouseX = mouseX;
+                recta.enteredMouseY = mouseY;
+            }
+        } else {
+            recta.enteredMouseX = undefined;
+            recta.enteredMouseY = undefined;
+        }
+    }
+    if((dist(points[points.length-1].x, points[points.length-1].y, mouseX, mouseY) > 2)
+      && mouseX > 0 && mouseX < WIDTH && mouseY > 0 && mouseY < HEIGHT){
+        if(rectWithMouse) {
+            let pt = rectWithMouse.translatePoint(mouseX, mouseY);
+            addPoint(pt.x, pt.y);
+
+        } else {
+            console.log("add mouse point");
+            addPoint(mouseX, mouseY);
+        }
+    }
+    
+
+    
     for(let i = 0; i < points.length; i++) {
         if(i >= 3) {
             strokeWeight(points[i-3].width);
