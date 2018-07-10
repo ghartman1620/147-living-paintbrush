@@ -1,5 +1,5 @@
-const WIDTH = 2400;
-const HEIGHT = 1200;
+const WIDTH = 1900;
+const HEIGHT = 960;
 
 // Computes the distance between two points. For use in deciding when to add new points to a vine.
 
@@ -151,7 +151,7 @@ function rectObj(x, y, width, height, r, g, b) {
 
 const points = [];
 const rectangles = [];
-rectangles.push(rectObj(0, 500, WIDTH, 200, 211, 211, 211));
+rectangles.push(rectObj(0, 400, WIDTH, 200, 211, 211, 211));
 
 
 // Adds a point to the vine, moving the vine growth forward.
@@ -159,6 +159,10 @@ function addPoint(x, y) {
     points.push({
         x,
         y,
+        // these may be different, like the translate point i do on the rect. so we can't have
+        // a bunch fo points being created even if the mouse isn't moving.
+        mouseX,
+        mouseY,
         width: undefined,
         flowers: [],
     });
@@ -171,7 +175,7 @@ function addPoint(x, y) {
         points[i].flowers = Object.assign([], points[i-1].flowers);
     }
     points[0].flowers = [];
-    points[0].width = 2+6*abs(sin(points.length/20));
+    points[0].width = 4+6*abs(sin(points.length/20));
 }
 
 function draw() { 
@@ -198,7 +202,7 @@ function draw() {
             recta.enteredMouseY = undefined;
         }
     }
-    if((dist(points[points.length-1].x, points[points.length-1].y, mouseX, mouseY) > 2)
+    if((dist(points[points.length-1].mouseX, points[points.length-1].mouseY, mouseX, mouseY) > 2)
       && mouseX > 0 && mouseX < WIDTH && mouseY > 0 && mouseY < HEIGHT){
         if(rectWithMouse) {
             let pt = rectWithMouse.translatePoint(mouseX, mouseY);
@@ -235,7 +239,7 @@ function draw() {
 function mousePressed() {
     let flowerX = random(-25, 25) + points[points.length-1].x;
     let flowerY = random(-25, 25) + points[points.length-1].y;
-    let flo = flower(random(-25, 25), random(-25, 25), round(random(3, 15)), round(random(1,3)), random(20, 100), random(10, 80), random(0, 255), random(0, 255), random(0, 255))
+    let flo = flower(random(-25, 25), random(-25, 25), round(random(3, 15)), round(random(1,3)), random(10, 60), random(10, 80), random(0, 255), random(0, 255), random(0, 255))
     points[0].flowers.push(flo);
     // flo.draw(points[0].x, points[0].y);
 }
