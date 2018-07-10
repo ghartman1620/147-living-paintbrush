@@ -181,7 +181,10 @@ function addPoint(x, y) {
 function draw() { 
     clear();
     
-    if(points.length === 0){
+    console.log(points.length);
+    console.log(mouseX);
+    console.log(mouseY);
+    if(points.length < 2 && (mouseX !== 0 && mouseY !== 0)){
         addPoint(mouseX, mouseY);
     }
     let rectWithMouse = undefined;
@@ -202,7 +205,7 @@ function draw() {
             recta.enteredMouseY = undefined;
         }
     }
-    if((dist(points[points.length-1].mouseX, points[points.length-1].mouseY, mouseX, mouseY) > 2)
+    if(points.length > 1 && (dist(points[points.length-1].mouseX, points[points.length-1].mouseY, mouseX, mouseY) > 2)
       && mouseX > 0 && mouseX < WIDTH && mouseY > 0 && mouseY < HEIGHT){
         if(rectWithMouse) {
             let pt = rectWithMouse.translatePoint(mouseX, mouseY);
